@@ -38,7 +38,7 @@ def generate_launch_description():
                 package='spinnaker_camera_driver',
                 plugin='spinnaker_camera_driver::CameraDriver',
                 name=LEFT_CAMERA_NAME,
-                namespace='stereo/left',
+                namespace='stereo',
                 parameters=[{
                     'parameter_file': config_path,
                     'serial_number': '25282106',
@@ -53,7 +53,7 @@ def generate_launch_description():
                 package='spinnaker_camera_driver',
                 plugin='spinnaker_camera_driver::CameraDriver',
                 name=RIGHT_CAMERA_NAME,
-                namespace='stereo/right',
+                namespace='stereo',
                 parameters=[{
                     'parameter_file': config_path,
                     'serial_number': '25235293',
