@@ -1,7 +1,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch_ros.actions import Node, ComposableNodeContainer
+from launch_ros.actions import Node
 
 #from perspective of cameras
 LEFT_CAMERA_NAME = 'left'
@@ -17,11 +17,6 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        ComposableNodeContainer(
-            name='vision_container',
-            namespace='',
-            
-        )
         Node(
             package='spinnaker_camera_driver',
             executable='camera_driver_node',
@@ -45,17 +40,33 @@ def generate_launch_description():
                 'camera_info_url': 'file:///home/sentry/camera_ws/stereoCal/right.yaml'
             }]
         ),
+        Node(
+            package='image_proc',
+            executable='image_proc',
+            namespace='stereo/left',
+            remappings=[
+                ('image', 'image_raw')
+            ]
+        ),
+        Node(
+            package='image_proc',
+            executable='image_proc',
+            namespace='stereo/right',
+            remappings=[
+                ('image', 'image_raw')
+            ]
+        ),
 
-        # Node(
-        #     package='stereo_image_proc',
-        #     executable='point_cloud_node',
-        #     namespace='stereo',
-        #     parameters=[{'approximate_sync': True}],
-        #     remappings=[
-        #         ('left/image_rect_color', 'left/image_rect'),
-        #         ('right/image_rect_color', 'right/image_rect')
-        #     ],
-        #     output='screen'
-        # )
+        Node(
+            package='stereo_image_proc',
+            executable='point_cloud_node',
+            namespace='stereo',
+            parameters=[{'approximate_sync': True}],
+            remappings=[
+                ('left/image_rect_color', 'left/image_rect'),
+                ('right/image_rect_color', 'right/image_rect')
+            ],
+            output='screen'
+        )
 
     ])
