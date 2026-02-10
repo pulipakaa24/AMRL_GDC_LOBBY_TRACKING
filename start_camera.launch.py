@@ -1,7 +1,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch_ros.actions import ComposableNodeContainer
+from launch_ros.actions import ComposableNodeContainer, Node
 from launch_ros.descriptions import ComposableNode
 
 # From perspective of cameras
@@ -32,8 +32,8 @@ def generate_launch_description():
         executable='component_container_mt',
         composable_node_descriptions=[
             # ── Left Blackfly S (serial 25282106) ──
-            # namespace='stereo/left' → publishes /stereo/left/image_raw
-            #                                      /stereo/left/camera_info
+            # namespace='stereo', name='left' → node name creates sub-namespace
+            # publishes: /stereo/left/image_raw, /stereo/left/camera_info
             ComposableNode(
                 package='spinnaker_camera_driver',
                 plugin='spinnaker_camera_driver::CameraDriver',
@@ -47,8 +47,8 @@ def generate_launch_description():
                 extra_arguments=[{'use_intra_process_comms': True}],
             ),
             # ── Right Blackfly S (serial 25235293) ──
-            # namespace='stereo/right' → publishes /stereo/right/image_raw
-            #                                       /stereo/right/camera_info
+            # namespace='stereo', name='right' → node name creates sub-namespace
+            # publishes: /stereo/right/image_raw, /stereo/right/camera_info
             ComposableNode(
                 package='spinnaker_camera_driver',
                 plugin='spinnaker_camera_driver::CameraDriver',
@@ -183,8 +183,25 @@ def generate_launch_description():
         output='screen',
     )
 
+    # ── Static TF: world → camera_link ──────────────────────────────────
+    #
+    # Provides a fixed frame for RViz. Identity transform places
+    # camera_link at the world origin. The stereo calibration YAMLs
+    # handle the actual left↔right extrinsics.
+    tf_publisher = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        arguments=[
+            '--x', '0', '--y', '0', '--z', '0',
+            '--yaw', '0', '--pitch', '0', '--roll', '0',
+            '--frame-id', 'world',
+            '--child-frame-id', 'camera_link',
+        ],
+    )
+
     return LaunchDescription([
         camera_container,
         image_proc_container,
         stereo_proc_container,
+        tf_publisher,
     ])
