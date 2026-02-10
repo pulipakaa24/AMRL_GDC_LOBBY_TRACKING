@@ -183,11 +183,12 @@ def generate_launch_description():
         output='screen',
     )
 
-    # ── Static TF: world → camera_link ──────────────────────────────────
+    # ── Static TF: world → left ──────────────────────────────────────────
     #
-    # Provides a fixed frame for RViz. Identity transform places
-    # camera_link at the world origin. The stereo calibration YAMLs
-    # handle the actual left↔right extrinsics.
+    # PointCloudNode publishes points2 with frame_id="left" (the left
+    # camera's node name). RViz needs a TF path from its fixed frame to
+    # "left" — this identity transform provides it. The left↔right
+    # extrinsics are encoded in the camera_info P matrices, not in TF.
     tf_publisher = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
@@ -195,7 +196,7 @@ def generate_launch_description():
             '--x', '0', '--y', '0', '--z', '0',
             '--yaw', '0', '--pitch', '0', '--roll', '0',
             '--frame-id', 'world',
-            '--child-frame-id', 'camera_link',
+            '--child-frame-id', 'left',
         ],
     )
 
